@@ -23,13 +23,19 @@ module Protokoll
 
       # Defining custom method
       send :define_method, "reserve_#{options[:column]}!".to_sym do
-        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : (self.methods && self.methods.include?(options[:pattern]) ? self.send(options[:pattern]) : options[:pattern])
+        options = self.build_protokoll_options(options)
         self[column] = Counter.next(self, options.merge({pattern: pattern}))
+      end
+
+      send :define_method, "build_protokoll_options".to_sym do |options|
+        options[:pattern] = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : (self.methods && self.methods.include?(options[:pattern]) ? self.send(options[:pattern]) : options[:pattern])
+        options
       end
 
       # Signing before_create
       before_create do |record|
         unless record[column].present?
+          options = record.build_protokoll_options(options)
           record[column] = Counter.next(self, options)
         end
       end
