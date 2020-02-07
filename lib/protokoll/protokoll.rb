@@ -23,7 +23,8 @@ module Protokoll
 
       # Defining custom method
       send :define_method, "reserve_#{options[:column]}!".to_sym do
-        self[column] = Counter.next(self, options)
+        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : options[:pattern]
+        self[column] = Counter.next(self, options.merge({pattern: pattern}))
       end
 
       # Signing before_create
@@ -37,7 +38,11 @@ module Protokoll
     private
 
     def pattern_includes_symbols?(options)
-      options[:pattern].count(options[:number_symbol]) > 0
+      if !options[:pattern].respond_to?(:call)
+        options[:pattern].count(options[:number_symbol]) > 0
+      else
+        true
+      end
     end
   end
 
