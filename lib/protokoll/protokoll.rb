@@ -19,11 +19,11 @@ module Protokoll
 
       options.merge!(_options)
       raise ArgumentError.new("pattern can't be nil!") if options[:pattern].nil?
-      raise ArgumentError.new("pattern requires at least one counter symbol #{options[:number_symbol]}") unless pattern_includes_symbols?(options)
+      # raise ArgumentError.new("pattern requires at least one counter symbol #{options[:number_symbol]}") unless pattern_includes_symbols?(options)
 
       # Defining custom method
       send :define_method, "reserve_#{options[:column]}!".to_sym do
-        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : options[:pattern]
+        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : (self.methods.include?(options[:pattern]) ? self.send(options[:pattern]) : options[:pattern])
         self[column] = Counter.next(self, options.merge({pattern: pattern}))
       end
 
@@ -37,13 +37,13 @@ module Protokoll
 
     private
 
-    def pattern_includes_symbols?(options)
-      if !options[:pattern].respond_to?(:call)
-        options[:pattern].count(options[:number_symbol]) > 0
-      else
-        true
-      end
-    end
+    # def pattern_includes_symbols?(options)
+    #   if !options[:pattern].respond_to?(:call)
+    #     options[:pattern].count(options[:number_symbol]) > 0
+    #   else
+    #     true
+    #   end
+    # end
   end
 
 end
