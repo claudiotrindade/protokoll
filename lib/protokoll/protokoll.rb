@@ -23,7 +23,7 @@ module Protokoll
 
       # Defining custom method
       send :define_method, "reserve_#{options[:column]}!".to_sym do
-        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : (self.methods.include?(options[:pattern]) ? self.send(options[:pattern]) : options[:pattern])
+        pattern = options[:pattern].respond_to?(:call) ? self.instance_eval(&options[:pattern]) : (self.methods && self.methods.include?(options[:pattern]) ? self.send(options[:pattern]) : options[:pattern])
         self[column] = Counter.next(self, options.merge({pattern: pattern}))
       end
 
