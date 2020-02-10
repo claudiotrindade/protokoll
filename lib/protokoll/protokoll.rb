@@ -23,8 +23,11 @@ module Protokoll
 
       # Defining custom method
       send :define_method, "reserve_#{options[:column]}!".to_sym do
+        _pattern = options[:pattern]
         options = self.build_protokoll_options(options)
         self[column] = Counter.next(self, options)
+        options[:pattern] = _pattern
+        self[column]
       end
 
       send :define_method, "build_protokoll_options".to_sym do |options|
